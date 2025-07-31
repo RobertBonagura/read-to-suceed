@@ -1,0 +1,3 @@
+# Original vm.max_map_count value: 65530
+# To restore original value, run:
+sudo sysctl -w vm.max_map_count=65530

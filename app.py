@@ -1,36 +1,49 @@
 import streamlit as st
 import pandas as pd
-from elasticsearch import Elasticsearch
+from opensearchpy import OpenSearch
 import boto3
 import json
 import os
+from requests_aws4auth import AWS4Auth
 from dotenv import load_dotenv
 
 load_dotenv()
 
 class BookRecommendationApp:
     def __init__(self):
-        self.es = None
+        self.client = None
         self.bedrock_client = None
         self.setup_connections()
     
     def setup_connections(self):
-        es_host = os.getenv('ELASTICSEARCH_HOST', 'localhost:9200')
-        es_username = os.getenv('ELASTICSEARCH_USERNAME')
-        es_password = os.getenv('ELASTICSEARCH_PASSWORD')
+        host = os.getenv('OPENSEARCH_HOST', 'localhost')
+        port = int(os.getenv('OPENSEARCH_PORT', '9200'))
+        use_ssl = os.getenv('OPENSEARCH_USE_SSL', 'false').lower() == 'true'
         
-        if es_username and es_password:
-            self.es = Elasticsearch(
-                [es_host],
-                basic_auth=(es_username, es_password),
-                verify_certs=True
+        if use_ssl:
+            # AWS managed OpenSearch
+            region = os.getenv('AWS_REGION', 'us-east-2')
+            credentials = boto3.Session().get_credentials()
+            awsauth = AWS4Auth(credentials.access_key, credentials.secret_key, region, 'es', session_token=credentials.token)
+            
+            self.client = OpenSearch(
+                hosts=[{'host': host, 'port': 443}],
+                http_auth=awsauth,
+                use_ssl=True,
+                verify_certs=True,
+                connection_class=None,
             )
         else:
-            self.es = Elasticsearch([es_host])
+            # Local OpenSearch
+            self.client = OpenSearch(
+                hosts=[{'host': host, 'port': port}],
+                use_ssl=False,
+                verify_certs=False,
+            )
         
         self.bedrock_client = boto3.client(
             'bedrock-runtime',
-            region_name=os.getenv('AWS_REGION', 'us-east-1'),
+            region_name=os.getenv('AWS_REGION', 'us-east-2'),
             aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
             aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY')
         )
@@ -42,7 +55,7 @@ class BookRecommendationApp:
         book_details = []
         for _, row in user_books.iterrows():
             try:
-                response = self.es.get(index="books", id=row['book_id'])
+                response = self.client.get(index="books", id=row['book_id'])
                 book_details.append(response['_source'])
             except Exception as e:
                 st.error(f"Error fetching book {row['book_id']}: {e}")
@@ -53,18 +66,17 @@ class BookRecommendationApp:
         query = {
             "size": num_recommendations,
             "query": {
-                "script_score": {
-                    "query": {"match_all": {}},
-                    "script": {
-                        "source": "cosineSimilarity(params.query_vector, 'content_embedding') + 1.0",
-                        "params": {"query_vector": book_embedding}
+                "knn": {
+                    "content_embedding": {
+                        "vector": book_embedding,
+                        "k": num_recommendations
                     }
                 }
             }
         }
         
         try:
-            response = self.es.search(index="books", body=query)
+            response = self.client.search(index="books", body=query)
             return [hit['_source'] for hit in response['hits']['hits']]
         except Exception as e:
             st.error(f"Error searching for similar books: {e}")
@@ -94,7 +106,7 @@ class BookRecommendationApp:
             
             response = self.bedrock_client.invoke_model(
                 body=body,
-                modelId="anthropic.claude-3-haiku-20240307-v1:0",
+                modelId="us.anthropic.claude-3-haiku-20240307-v1:0",
                 accept="application/json",
                 contentType="application/json"
             )
@@ -109,8 +121,10 @@ class BookRecommendationApp:
         st.title("📚 AI-Powered Book Recommendations")
         st.write("Get personalized book recommendations based on your reading history!")
         
-        if not self.es.ping():
-            st.error("Cannot connect to Elasticsearch. Please check your configuration.")
+        try:
+            self.client.info()
+        except Exception:
+            st.error("Cannot connect to OpenSearch. Please check your configuration.")
             return
         
         user_id = st.text_input("Enter Student ID:", placeholder="e.g., student_001")
