@@ -54,6 +54,11 @@ class BookRecommendationProcessor:
     
     def create_index(self):
         index_mapping = {
+            "settings": {
+                "index": {
+                    "knn": True
+                }
+            },
             "mappings": {
                 "properties": {
                     "book_id": {"type": "integer"},
@@ -132,7 +137,7 @@ class BookRecommendationProcessor:
         for idx, row in book_catalog.iterrows():
             collab_features = collaborative_factors[row['book_id']]
             if collab_features is None:
-                collab_features = np.zeros(100)  # Match dimension in mapping
+                collab_features = np.zeros(50)  # Default size
             
             doc = {
                 "book_id": int(row['book_id']),
@@ -169,6 +174,8 @@ class BookRecommendationProcessor:
         
         print("Generating collaborative embeddings...")
         collaborative_factors = self.generate_collaborative_embeddings(rental_history, book_catalog)
+        print(f"Sample collaborative factors: {list(collaborative_factors.items())[:3]}")
+        
         print("Indexing books...")
         self.index_books(book_catalog, content_embeddings, collaborative_factors)
         
