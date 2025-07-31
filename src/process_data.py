@@ -53,10 +53,10 @@ class BookRecommendationProcessor:
             return False
     
     def create_index(self):
-        index_mapping = {
+        index_settings = {
             "settings": {
                 "index": {
-                    "knn": True
+                    "knn": True,
                 }
             },
             "mappings": {
@@ -79,7 +79,7 @@ class BookRecommendationProcessor:
                     },
                     "collaborative_features": {
                         "type": "knn_vector",
-                        "dimension": 100,
+                        "dimension": 50,
                         "method": {
                             "name": "hnsw",
                             "space_type": "cosinesimil",
@@ -93,7 +93,7 @@ class BookRecommendationProcessor:
         if self.client.indices.exists(index="books"):
             self.client.indices.delete(index="books")
         
-        self.client.indices.create(index="books", body=index_mapping)
+        self.client.indices.create(index="books", body=index_settings)
         print("Created books index")
     
     def load_data(self):
