@@ -1,0 +1,17 @@
+book_id,title,author,isbn,description,genre,publication_year
+1,"Harry Potter and the Philosopher's Stone","J.K. Rowling","9780747532699","Harry Potter, a young wizard, discovers his magical heritage on his 11th birthday when he receives a letter to Hogwarts School of Witchcraft and Wizardry.","Fantasy",1997
+2,"To Kill a Mockingbird","Harper Lee","9780061120084","A gripping tale of racial injustice and childhood innocence in the American South during the 1930s.","Fiction",1960
+3,"The Giver","Lois Lowry","9780544336261","In a seemingly perfect community without war, pain, suffering, differences or choice, a young boy is chosen to learn from an elderly man about the true pain and pleasure of the real world.","Science Fiction",1993
+4,"Wonder","R.J. Palacio","9780375869020","August Pullman was born with a facial difference that prevented him from going to a mainstream school—until now. He's about to start 5th grade at Beecher Prep.","Fiction",2012
+5,"The Hunger Games","Suzanne Collins","9780439023481","In a post-apocalyptic world, Katniss Everdeen volunteers for the Hunger Games to save her sister, entering a televised fight to the death.","Science Fiction",2008
+6,"Percy Jackson & The Lightning Thief","Rick Riordan","9780786838653","Percy Jackson discovers he's a demigod, the son of Poseidon, and must prevent a war between the gods by finding Zeus's missing lightning bolt.","Fantasy",2005
+7,"Holes","Louis Sachar","9780374332662","Stanley Yelnats is sent to a detention center where the boys dig holes every day as punishment, but there's more to the digging than meets the eye.","Adventure",1998
+8,"The Outsiders","S.E. Hinton","9780142407332","The story of Ponyboy Curtis and his struggles with right and wrong in a society in which he believes that he is an outsider.","Fiction",1967
+9,"Matilda","Roald Dahl","9780142410370","Matilda is a brilliant child with a vivid imagination, but her parents think she's just a nuisance. When she starts school, she meets the kind Miss Honey.","Children's Fiction",1988
+10,"Bridge to Terabithia","Katherine Paterson","9780064401845","Jesse and Leslie create an imaginary kingdom in the woods called Terabithia, but their friendship faces an unexpected tragedy.","Fiction",1977
+11,"Hatchet","Gary Paulsen","9780142402511","After a plane crash, 13-year-old Brian must survive alone in the Canadian wilderness with only a hatchet as his tool.","Adventure",1987
+12,"The Maze Runner","James Dashner","9780385737944","Thomas wakes up in a mysterious place called the Glade, surrounded by a massive maze, with no memory of his past.","Science Fiction",2009
+13,"Diary of a Wimpy Kid","Jeff Kinney","9780810993136","The humorous journal of Greg Heffley as he navigates the challenges of middle school.","Humor",2007
+14,"Where the Red Fern Grows","Wilson Rawls","9780553274295","Billy works hard to save money for two hunting dogs, and together they become the best hunting team in the Ozark Mountains.","Adventure",1961
+15,"The Book Thief","Markus Zusak","9780375842207","Set in Nazi Germany, this is the story of Liesel, a young girl who steals books and shares them with others during the horrors of World War II.","Historical Fiction",2005
+16,"The Hobbit","J.R.R. Tolkien","9780547928227","Bilbo Baggins, a comfortable hobbit, is swept into an epic quest to reclaim the lost Dwarf Kingdom of Erebor from the fearsome dragon Smaug.","Fantasy",1937
