@@ -95,6 +95,40 @@ class LibraryDatabaseApp:
             st.error(f"Error searching for similar books: {e}")
             return []
     
+    def get_collaborative_recommendations(self, user_id, num_recommendations=5):
+        try:
+            # Query for books with collaborative_features
+            query = {
+                "query": {"match_all": {}},
+                "size": 100
+            }
+            
+            response = self.client.search(index="books", body=query)
+            books_with_collab = [hit['_source'] for hit in response['hits']['hits'] 
+                               if 'collaborative_features' in hit['_source']]
+            
+            if not books_with_collab:
+                return []
+            
+            # Get user's reading history book IDs
+            user_books = self.rental_history[self.rental_history['user_id'] == user_id]['book_id'].tolist()
+            
+            # Score books based on collaborative features
+            recommendations = []
+            for book in books_with_collab:
+                if book['book_id'] not in user_books:
+                    # Use collaborative_features as similarity score
+                    collab_score = sum(book['collaborative_features'])
+                    recommendations.append((book, collab_score))
+            
+            # Sort by collaborative score and return top recommendations
+            recommendations.sort(key=lambda x: x[1], reverse=True)
+            return [book for book, score in recommendations[:num_recommendations]]
+            
+        except Exception as e:
+            st.error(f"Error getting collaborative recommendations: {e}")
+            return []
+
     def generate_recommendation_snippet(self, user_book, recommended_book):
         prompt = f"""
         Create a short, engaging recommendation snippet (1-2 sentences) explaining why someone who enjoyed "{user_book['title']}" by {user_book['author']} would like "{recommended_book['title']}" by {recommended_book['author']}.
@@ -215,7 +249,7 @@ class LibraryDatabaseApp:
                 for book in reading_history:
                     st.write(f"• **{book['title']}** by {book['author']}")
                 
-                st.subheader("💡 Recommended Books")
+                st.subheader("🎯 Based on your reading history:")
                 
                 all_recommendations = []
                 for user_book in reading_history:
@@ -255,6 +289,33 @@ class LibraryDatabaseApp:
                             st.write(f"**ISBN:** {rec_book['isbn']}")
                         
                         st.divider()
+                
+                # Collaborative filtering recommendations
+                st.subheader("👥 Based on other readers like you:")
+                
+                collab_recommendations = self.get_collaborative_recommendations(user_id, num_recommendations=5)
+                
+                if collab_recommendations:
+                    for rec_book in collab_recommendations:
+                        with st.container():
+                            col1, col2 = st.columns([3, 1])
+                            
+                            with col1:
+                                st.write(f"**{rec_book['title']}**")
+                                st.write(f"*by {rec_book['author']} ({rec_book['publication_year']})*")
+                                st.write(f"**Genre:** {rec_book['genre']}")
+                                
+                                st.write("💡 Readers with similar tastes enjoyed this book.")
+                                
+                                with st.expander("Book Description"):
+                                    st.write(rec_book['description'])
+                            
+                            with col2:
+                                st.write(f"**ISBN:** {rec_book['isbn']}")
+                            
+                            st.divider()
+                else:
+                    st.info("No collaborative filtering data available yet.")
     
     def show_book_browser(self):
         st.header("📖 Book Browser")
