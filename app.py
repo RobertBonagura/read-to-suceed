@@ -248,6 +248,8 @@ class LibraryDatabaseApp:
                 st.subheader("📖 Recent Reading History")
                 for book in reading_history:
                     st.write(f"• **{book['title']}** by {book['author']}")
+                    with st.expander("Book Description"):
+                        st.write(book['description'])
                 
                 st.subheader("🎯 Based on your reading history:")
                 

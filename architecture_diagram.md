@@ -7,12 +7,12 @@
 │   DATA SOURCES  │────▶│  DATA PROCESSING  │────▶│ VECTOR DATABASE │◀────│ APPLICATION     │◀────│ USER INTERFACE  │
 │                 │     │                   │     │                 │     │                 │     │                 │
 │ • book_catalog  │     │ BookRecommend     │     │ OpenSearch      │     │ LibraryDatabase │     │ Streamlit App   │
-│   (27 books)    │     │ Processor         │     │ Docker:9200     │     │ App             │     │                 │
+│   (26 books)    │     │ Processor         │     │ Docker:9200     │     │ App             │     │                 │
 │ • rental_hist   │     │                   │     │                 │     │                 │     │ • Rental Hist   │
-│   (54 records)  │     │ • Embeddings      │     │ Index: "books"  │     │ • find_similar  │     │ • Recommend     │
+│   (12 records)  │     │ • Embeddings      │     │ Index: "books"  │     │ • find_similar  │     │ • Recommend     │
 │                 │     │   384-dim         │     │ Settings:       │     │ • get_history   │     │ • Browse Books  │
-│                 │     │ • Collaborative   │     │   knn=true      │     │                 │     │                 │
-│                 │     │   50-dim SVD      │     │                 │     │                 │     │                 │
+│                 │     │ • Collaborative   │     │   knn=true      │     │ • get_cont_rec  │     │                 │
+│                 │     │   100-dim SVD     │     │                 │     │ • get_coll_rec  │     │                 │
 └─────────────────┘     └───────────────────┘     └─────────────────┘     └─────────────────┘     └─────────────────┘
                                                                                     │
                                                                                     ▼
