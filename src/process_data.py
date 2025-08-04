@@ -79,7 +79,7 @@ class BookRecommendationProcessor:
                     },
                     "collaborative_features": {
                         "type": "knn_vector",
-                        "dimension": 50,
+                        "dimension": 100,
                         "method": {
                             "name": "hnsw",
                             "space_type": "cosinesimil",
@@ -135,9 +135,26 @@ class BookRecommendationProcessor:
     
     def index_books(self, book_catalog, content_embeddings, collaborative_factors):
         for idx, row in book_catalog.iterrows():
-            collab_features = collaborative_factors[row['book_id']]
-            if collab_features is None:
-                collab_features = np.zeros(50)  # Default size
+            collab_features = collaborative_factors.get(row['book_id'])
+            if collab_features is None or not isinstance(collab_features, np.ndarray):
+                print(f"Warning: Using default features for book_id {row['book_id']}")
+                collab_features = np.zeros(self.collaborative_model.n_factors)
+            
+            # Ensure collab_features is not None and convert to list
+            if collab_features is not None and hasattr(collab_features, 'tolist'):
+                # Check for NaN values and replace them
+                if np.any(np.isnan(collab_features)):
+                    print(f"Warning: Found NaN values in collab_features for book_id {row['book_id']}")
+                    collab_features = np.nan_to_num(collab_features, nan=0.0)
+                collab_list = collab_features.tolist()
+                
+                # Final check to ensure no None values in list
+                if any(x is None for x in collab_list):
+                    print(f"Warning: Found None in collab_list for book_id {row['book_id']}")
+                    collab_list = [0.0 if x is None else x for x in collab_list]
+            else:
+                print(f"Error: collab_features is {type(collab_features)} for book_id {row['book_id']}")
+                collab_list = np.zeros(self.collaborative_model.n_factors).tolist()
             
             doc = {
                 "book_id": int(row['book_id']),
@@ -148,7 +165,7 @@ class BookRecommendationProcessor:
                 "genre": row['genre'],
                 "publication_year": int(row['publication_year']),
                 "content_embedding": content_embeddings[idx].tolist(),
-                "collaborative_features": collab_features.tolist()
+                "collaborative_features": collab_list
             }
             
             self.client.index(index="books", id=row['book_id'], body=doc)
